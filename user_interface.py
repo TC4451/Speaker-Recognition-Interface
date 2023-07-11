@@ -1,26 +1,41 @@
 import tkinter as tk
+from sound_recording import record_sample
 
 root = tk.Tk()
 root.geometry('600x400')
 root.title('Speaker Recognition')
 
+# record the sample audio and save it to the sample directory
+def save_sample(entry):
+    name = entry.get()
+    record_sample(5, "./speaker_voice_sample/"+name+".wav")
+
 # call enrollment page
 def enrollment_page():
     enrollment_frame = tk.Frame(main_frame)
 
-    # for testing
-    lb = tk.Label(enrollment_frame, text = 'enrollment frame', font=('Bold', 30))
-    lb.pack()
+    # # for testing
+    # lb = tk.Label(enrollment_frame, text = 'enrollment frame', font=('Bold', 30))
+    # lb.pack()
+
+    enroll_entry = tk.Entry(main_frame)
+    enroll_entry.pack(expand=True, anchor="center")
+
+    enroll_btn = tk.Button(enrollment_frame, text='Enroll', font=('Bold', 15),
+                            fg='#158aff', bd=0,
+                            command=lambda:save_sample(enroll_entry))
+    # enroll_btn.place(relx=0.5, rely=0.5, anchor="center")
+    enroll_btn.pack(expand=True, anchor="center")
     
     enrollment_frame.pack(pady=20)
 
 # call recognition page
 def recognition_page():
-    enrollment_frame = tk.Frame(main_frame)
+    recognition_frame = tk.Frame(main_frame)
 
-    lb = tk.Label(enrollment_frame, text = 'recognition frame', font=('Bold', 30))
+    lb = tk.Label(recognition_frame, text = 'recognition frame', font=('Bold', 30))
     lb.pack()
-    enrollment_frame.pack(pady=20)
+    recognition_frame.pack(pady=20)
 
 def hide_page():
     for frame in main_frame.winfo_children():
