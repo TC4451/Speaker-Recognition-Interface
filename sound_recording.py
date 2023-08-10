@@ -1,16 +1,12 @@
-# this file manages both sample audio recording and real-time sound-to-tensor conversion
-
+# sound_recording.py manages sample audio recording and serves as the interface for communication between local and server machine
 import sounddevice as sd
-import soundfile as sf
 import threading
 import client_sb
-import numpy as np
-import time
 
 # duration of recording
 duration = 2
 # output audio file name 
-output_file = "temp.wav"
+output_file = "temp.npy"
 # defined sample rate
 sample_rate = 16000
 # defined number of channels
@@ -22,33 +18,28 @@ def record_sample(duration, output_file):
         # Record audio using sounddevice
         recording = sd.rec(int(duration * sample_rate), samplerate=sample_rate, channels=channels, dtype='float64')
         sd.wait()  # Wait for recording to finish
-
-        # # Save the recorded audio to a file
-        # sf.write(output_file, recording, sample_rate)
-        # from scipy.io import wavfile
-        # wavfile.write("output.wav", sample_rate, recording)
-        client_sb.send_nparray_no_response(recording)
         print(recording)
         print(recording.shape)
-        client_sb.send_string(output_file)
+        # np.save(output_file, recording)
+        client_sb.enroll_process(output_file, recording)
 
     threading.Thread(target=recording_thread).start()
 
 # record audio and convert it to a tensor
 def audio_to_numpy(duration):
-    recording = sd.rec(int(duration * sample_rate), samplerate=sample_rate, channels=channels)
+    recording = sd.rec(int(duration * sample_rate), samplerate=sample_rate, channels=channels, dtype='float64')
     sd.wait()  # Wait for recording to finish
     return recording
 
 # connect to server and pass the 1 sec recording for processing
 # return: name of the speaker
 def verify_speaker(audio_np):
-    name = client_sb.send_nparray_for_identification(audio_np)
+    name = client_sb.recognize_process(audio_np)
     return name
 
 # connet to server to load sample audios into instance variables to start recognition
 def load_samples():
-    client_sb.send_string('load_samples')
+    client_sb.load_sample_process()
     
 
 
@@ -70,7 +61,7 @@ def load_samples():
 # client_sb.send_string('server_numpy_sync_testing.npy')
 
 
-# record_audio(duration, output_file)
+# record_sample(3, output_file)
 
 # time.sleep(5)
 
